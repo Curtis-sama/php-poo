@@ -1,101 +1,94 @@
 <?php
-use Models\Autoloader;
-/**
- * On ajoute le timezone pour éviter un décalage horaire sur la manipulation des dates (exemple : DateInterval = H-1)
- */
-ini_set("date.timezone", "Europe/Paris");
 
+// PROJET FIL ROUGE : Blog - Thème voyage - Sous-catégories : Culinaire / Art / Actus Sportives + Possibilité de reviews - Si possible, devis voyage.
 /**
- * Requires
+ * Galerie photo / formulaire via lien externes ?
+ * Culinaire
+ * Actus sportive
+ * Voyage
+ * Art
+ * Reviews
+ * Création de devis
  */
+
+ini_set("date.timezone", "Europe/Paris");
 require_once "./utils/Defines.php";
 require_once "./models/Autoloader.php";
+use Models\Autoloader;
+use Models\BDD;
+
 /**
- * use Autoloader to autoload all models
+ * Use autoloader to import all models
  */
 Autoloader::register();
-/**
- * use Models
- */
-use Models\BDD;
-use Models\Utils;
-use Models\Article;
 
 use Models\Router;
-
-// spl_autoload_register(function ($class) {
-//   $class = ucfirst($class);
-//   $class = str_replace("\\", "/", $class);
-//   $class_path = ROOT . "/{$class}.php";
-//   if (file_exists($class_path)) {
-//     require_once $class_path;
-//   }
-// });
+use Models\Article;
+use Controllers\BlogController;
+use Controllers\ArticlesController;
+use Controllers\ErrorsController;
 
 $article = new Article(BDD::connect());
 
 $article_test = [
   "title" => "Test",
-  "content" => "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quam qui reprehenderit deserunt dolorem praesentium, autem nihil dolorum officiis officia, ab accusantium cum labore, soluta natus iusto incidunt distinctio minus error?",
+  "content" => "Contenu de test",
   "author" => "webdevoo"
 ];
 
 /**
- * Ajout d'un article en base de données
+ * Utilisation classique de la méthode add(), de la classe Article
  */
-// $article::add(
+// $article->add(
 //   $article_test["title"],
 //   $article_test["content"],
-//   $article_test["author"]
+//   $article_test["author"],
 // );
 
 // var_dump($article::getList());
+// echo "<hr/>";
+// var_dump($article::getById(1));
 
-// var_dump($article::getById(9));
+// $article_updated = [
+//   "id" => 1,
+//   "title" => "Test modifié",
+//   "content" => "Contenu modifié",
+//   "author" => "WebdevooUpdated",
+//   "created_date" => new \Datetime("now")
+// ];
 
-// var_dump($article::getLast());
-
-$updated_article = [
-  "id" => 9,
-  "title" => "Test mis à jour",
-  "content" => "Ce contenu a été mis à jour",
-  "author" => "WebdevooUpdated",
-  "created_date" => new \Datetime("now")
-];
-
-// var_dump($article->update(
-//   $updated_article["id"],
-//   $updated_article["title"],
-//   $updated_article["content"],
-//   $updated_article["author"],
-//   $updated_article["created_date"]->sub(\DateInterval::createFromDateString("1 hour"))->format("Y/m/d H:i:s"),
-// ));
-
-// var_dump($article::getById(9));
-
-// var_dump($article::deleteAll());
-
-// var_dump($article::deleteArticle(11));
-
-Utils::helloWorld();
+// $article::update(
+//   $article_updated["id"],
+//   $article_updated["title"],
+//   $article_updated["content"],
+//   $article_updated["author"],
+//   $article_updated["created_date"]->sub(\DateInterval::createFromDateString("1 hour"))->format("Y/m/d H:i:s"),
+// );
 
 // On instancie le routeur
 $router = new Router();
 
+$uri = $_SERVER["REQUEST_URI"];
+$idParam = (int) preg_replace("/[\D]+/", "", $uri);
+
+
 // On définit les routes
-$router->get("/", function(){
-  echo "Page d'accueil";
-});
+switch (true) {
+  case ($uri === "/"):
+    $router->get("/", BlogController::index());
+    break;
+  case (str_contains($uri, "/articles")):
+    if ($idParam) {
+      $router->get("/articles/$idParam", ArticlesController::getArticle($idParam));
+      exit;
+    }
+    $router->get("/articles", Articlescontroller::getList());
+    break;
+  default:
+  $router->get("/articles", ErrorsController::launchError(404));
+  break;
+}
 
-$router->get("/articles", function(){
-  var_dump(Article::getList());
-});
-
-$router->get('/articles/:id', function(int $id){
-  if(!is_null($id)){
-    Article::getById($id);
-  }
-});
 
 // On exécute le routeur, sinon il ne fonctionnera pas 😶‍🌫️
 $router->run();

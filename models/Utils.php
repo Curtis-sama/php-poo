@@ -1,6 +1,8 @@
 <?php
 namespace Models;
 
+use Controllers\ErrorsController;
+
 class Utils{
 
   public static function helloWorld(){
@@ -17,7 +19,12 @@ class Utils{
   }
 
   public static function readException(\Exception $e){
-    die("Exception : ". $e->getMessage());
+    /**
+     * To debug, uncomment this die().
+     */
+    // die("Exception : ". $e->getMessage());
+    
+    ErrorsController::launchError(404);
   }
 
 }

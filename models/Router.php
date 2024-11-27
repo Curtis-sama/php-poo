@@ -26,7 +26,6 @@ class Router{
     $method = $_SERVER["REQUEST_METHOD"];
 
     if(!isset($this->routes[$method][$uri])){
-      echo "Page introuvable.";
       exit;  
     }
 
