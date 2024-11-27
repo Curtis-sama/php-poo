@@ -96,27 +96,27 @@ h1, h2, h3, h4, h5, h6{
 }
 
 h1{
-  font-size:160%;
+  font-size:180%;
 }
 
 h2{
-  font-size:145%;
-}
-
-h3{
-  font-size:135%;
-}
-
-h4{
-  font-size:130%;
-}
-
-h5{
   font-size:125%;
 }
 
-h6{
+h3{
+  font-size:122.5%;
+}
+
+h4{
   font-size:120%;
+}
+
+h5{
+  font-size:117.5%;
+}
+
+h6{
+  font-size:115%;
 }
 
 .nav-links {
@@ -204,6 +204,7 @@ a:hover{
   display:flex;
   flex-direction:column;
   min-height:100dvh;
+  padding:1.2% 2%;
 }
 
 .main-sections{
@@ -213,13 +214,11 @@ a:hover{
   justify-content:flex-start;
   align-items:center;
   flex-wrap:wrap;
-  margin-inline:auto;
-  padding:2rem;
+  padding:.4% .8%;
 }
 
 .main-articles{
-  width:80dvw;
-  margin-inline:auto;
+  max-width:80dvw;
 }
 
 .main-articles p{
