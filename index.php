@@ -14,19 +14,21 @@
 ini_set("date.timezone", "Europe/Paris");
 require_once "./utils/Defines.php";
 require_once "./models/Autoloader.php";
+
 use Models\Autoloader;
-use Models\BDD;
 
 /**
  * Use autoloader to import all models
  */
 Autoloader::register();
 
+use Models\BDD;
 use Models\Router;
+use Controllers\SlotMachineController;
 use Models\Article;
-use Controllers\BlogController;
-use Controllers\ArticlesController;
 use Controllers\ErrorsController;
+use Controllers\ArticlesController;
+use Controllers\BlogController;
 
 $article = new Article(BDD::connect());
 
@@ -45,8 +47,6 @@ $article_test = [
 //   $article_test["author"],
 // );
 
-// var_dump($article::getList());
-// echo "<hr/>";
 // var_dump($article::getById(1));
 
 // $article_updated = [
@@ -65,30 +65,46 @@ $article_test = [
 //   $article_updated["created_date"]->sub(\DateInterval::createFromDateString("1 hour"))->format("Y/m/d H:i:s"),
 // );
 
-// On instancie le routeur
 $router = new Router();
 
 $uri = $_SERVER["REQUEST_URI"];
 $idParam = (int) preg_replace("/[\D]+/", "", $uri);
 
-
-// On définit les routes
 switch (true) {
   case ($uri === "/"):
     $router->get("/", BlogController::index());
     break;
+  
   case (str_contains($uri, "/articles")):
-    if ($idParam) {
-      $router->get("/articles/$idParam", ArticlesController::getArticle($idParam));
+    if ($idParam && !str_contains($uri, "/update")) {
+      $router->get("/articles/$idParam", ArticlesController::getById($idParam));
       exit;
     }
-    $router->get("/articles", Articlescontroller::getList());
+    else if($idParam && str_contains($uri, "/update")){
+      $router->get("/articles/update/$idParam", ArticlesController::update($idParam));
+      exit;
+    }
+    else if(!$idParam && str_contains($uri, "/update")){
+      $router->post("/articles/update", ArticlesController::updateArticle());
+      exit;
+    }
+    else if(!$idParam && str_contains($uri, "/delete")){
+      $router->post("/articles/delete", ArticlesController::deleteArticle());
+      exit;
+    }
+    $router->get("/articles", ArticlesController::getList());
+
+    case (str_contains($uri, "/slot-machine")): 
+      $router->get("/slot-machine", SlotMachineController::index());
+      exit;
+    case (str_contains($uri, "/play")): 
+      $router->get("/play", SlotMachineController::play());
+      exit;
+   
     break;
   default:
-  $router->get("/articles", ErrorsController::launchError(404));
-  break;
+    ErrorsController::launchError(404);
+    break;
 }
 
-
-// On exécute le routeur, sinon il ne fonctionnera pas 😶‍🌫️
 $router->run();
